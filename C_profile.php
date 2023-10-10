@@ -95,6 +95,7 @@ $results = $dbHandler->fetchResults($_SESSION['name']);
     </div>
 </div>
 
+
 <div class="container mt-4 additional-section">
     <div class="row">
         <div class="col-md-12">
