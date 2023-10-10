@@ -1,0 +1,90 @@
+<?php
+session_start();
+error_reporting(0);
+
+class UserAuthentication
+{
+    private $conn;
+
+    public function __construct()
+    {
+        $this->conn = new mysqli("localhost", "root", "", "user");
+    }
+
+    public function authenticateUser($email, $password)
+    {
+        $email = $this->testInput($email);
+        $password = $this->testInput($password);
+
+        if (!$this->conn->connect_error) {
+            $sql = "SELECT * FROM mine WHERE email1=? and password1=?";
+            $stmt = $this->conn->prepare($sql);
+            $stmt->bind_param("ss", $email, $password);
+
+            if ($stmt->execute()) {
+                $result = $stmt->get_result();
+                if ($result->num_rows) {
+                    $_SESSION['email'] = $email;
+                    header('Location: welcome.php');
+                    exit();
+                } else {
+                    $err = "Wrong username And/or Password ";
+                }
+            }
+        }
+
+        return isset($err) ? $err : "";
+    }
+
+    private function testInput($x)
+    {
+        $x = trim($x);
+        $x = stripslashes($x);
+        $x = htmlspecialchars($x);
+        return $x;
+    }
+
+    public function closeConnection()
+    {
+        $this->conn->close();
+    }
+}
+
+if ($_SERVER['REQUEST_METHOD'] == "POST") {
+    $authenticator = new UserAuthentication();
+    $err = $authenticator->authenticateUser($_POST['email'], $_POST['password']);
+    $authenticator->closeConnection();
+}
+?>
+
+<!DOCTYPE html>
+<html>
+
+<head>
+    <!-- Head section remains the same -->
+</head>
+
+<body>
+    <div id="container">
+        <div class="sign-in-form">
+            <table>
+                <h1>Welcome to CMA</h1>
+                <h2>Log in</h2>
+                <form method="post" action="<?php echo htmlspecialchars($_SERVER['PHP_SELF']); ?>"
+                    enctype="multipart/form-data">
+                    <!-- Form fields remain the same -->
+                </form>
+                <?php
+                if (isset($err)) {
+                    echo "<div class=\"red\">$err</div>";
+                }
+                ?>
+            </table>
+        </div>
+    </div>
+    <script>
+        // JavaScript code remains the same
+    </script>
+</body>
+
+</html>
